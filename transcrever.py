@@ -4,6 +4,9 @@ import os
 PASTA_VIDEOS = "videos"
 PASTA_TRANSCRICOES = "transcricoes"
 
+os.makedirs(PASTA_VIDEOS, exist_ok=True)
+os.makedirs(PASTA_TRANSCRICOES, exist_ok=True)
+
 print("Carregando modelo...")
 model = whisper.load_model("base")
 
