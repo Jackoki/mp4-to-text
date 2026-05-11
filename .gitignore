@@ -1,0 +1,41 @@
+# Ambiente virtual
+venv/
+
+# Cache Python
+__pycache__/
+*.pyc
+
+# Logs
+*.log
+log.txt
+
+# Transcrições geradas
+transcricoes/
+
+# Vídeos
+videos/
+
+# VSCode
+.vscode/
+
+# JetBrains
+.idea/
+
+# Windows
+Thumbs.db
+Desktop.ini
+
+# Arquivos temporários
+*.tmp
+
+# Cache HuggingFace
+.cache/
+
+# Modelos baixados
+models/
+
+# PyTorch / CUDA cache
+torch_cache/
+
+# Arquivos de sistema
+.DS_Store
