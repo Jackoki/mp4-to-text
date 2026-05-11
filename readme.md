@@ -51,7 +51,7 @@ mp4-to-text/
 
 ---
 
-## 📦 Instalação do FFmpeg (opcional, mas recomendado)
+## 📦 Instalação do FFmpeg
 
 O FFmpeg é uma ferramenta utilizada para leitura e processamento de arquivos de vídeo e áudio.  
 Ele pode ser necessário em alguns sistemas para garantir compatibilidade com arquivos `.mp4`.
