@@ -1,6 +1,5 @@
 import os
 import time
-from tqdm import tqdm
 from faster_whisper import WhisperModel
 from concurrent.futures import ThreadPoolExecutor, as_completed
 
@@ -16,12 +15,40 @@ def preparar_pastas():
     os.makedirs(NOME_PASTA_DE_TRANSCRICOES, exist_ok=True)
 
 
-def carregar_modelo():
+def carregar_modelo(usar_gpu):
+    if usar_gpu:
+        try:
+            print("Carregando modelo na GPU...")
+            return WhisperModel("base", device="cuda", compute_type="float16")
+
+        except Exception:
+            print("GPU indisponivel. Utilizando CPU...")
+
+    print("Carregando modelo na CPU...")
+
     return WhisperModel("base", device="cpu", compute_type="int8")
 
 
 def obter_videos(pasta):
-    return [f for f in os.listdir(pasta) if f.endswith(".mp4")]
+    return [
+        f for f in os.listdir(pasta)
+        if f.lower().endswith(".mp4")
+    ]
+
+
+def escolher_processamento():
+    while True:
+        escolha = input(
+            "Escolha a opcao:\n"
+            "0 - CPU\n"
+            "1 - GPU\n"
+            "Opcao: "
+        )
+
+        if escolha in ["0", "1"]:
+            return int(escolha)
+
+        print("\nEscolha invalida\n")
 
 
 # ------------------ UTILITÁRIOS ------------------
@@ -29,6 +56,7 @@ def obter_videos(pasta):
 def verificar_video_foi_processado(video):
     nome_txt = os.path.splitext(video)[0] + ".txt"
     caminho_txt = os.path.join(NOME_PASTA_DE_TRANSCRICOES, nome_txt)
+
     return os.path.exists(caminho_txt), caminho_txt
 
 
@@ -46,22 +74,15 @@ def salvar_transcricao(texto, caminho_saida):
 
 def transcrever_video(modelo, caminho_video):
     segments, info = modelo.transcribe(caminho_video)
-
     linhas = []
+
     for seg in segments:
         linhas.append(f"[{seg.start:.2f} - {seg.end:.2f}] {seg.text}")
 
     return "\n".join(linhas)
 
 
-def medir_tempo(func, *args):
-    start = time.time()
-    resultado = func(*args)
-    tempo = time.time() - start
-    return resultado, tempo
-
-
-# ------------------ PIPELINE DE PROCESSAMENTO ------------------
+# ------------------ PROCESSAMENTO ------------------
 
 def processar_video(modelo, video):
     caminho_video = os.path.join(NOME_PASTA_DE_VIDEOS, video)
@@ -73,30 +94,47 @@ def processar_video(modelo, video):
         gerar_log(f"SKIP - {video}")
         return
 
-    print(f"Transcrevendo: {video}")
+    print(f"\nTranscrevendo: {video}")
+    start = time.time()
 
-    texto, tempo = medir_tempo(transcrever_video, modelo, caminho_video)
-
+    texto = transcrever_video(modelo, caminho_video)
+    tempo = time.time() - start
     salvar_transcricao(texto, caminho_txt)
 
     print(f"OK: {video} ({tempo:.2f}s)")
+
     gerar_log(f"OK - {video} - {tempo:.2f}s")
 
 
-# ------------------ PARALELISMO ------------------
+# ------------------ GPU ------------------
 
-def processar_videos_em_paralelo(modelo, videos, max_workers=2):
-    print(f"Iniciando processamento paralelo ({max_workers} workers)...")
+def processar_videos_normal(modelo, videos):
+    print("\nIniciando processamento na GPU...")
+
+    for video in videos:
+        try:
+            processar_video(modelo, video)
+
+        except Exception as e:
+            print(f"[ERRO] {e}")
+            gerar_log(f"ERRO - {e}")
+
+
+# ------------------ CPU PARALELO ------------------
+
+def processar_videos_em_paralelo(modelo, videos, max_workers):
+    print(f"\nIniciando processamento paralelo " f"({max_workers} workers)...")
 
     with ThreadPoolExecutor(max_workers=max_workers) as executor:
         futures = [
-            executor.submit(processar_video, modelo, video)
+            executor.submit(processar_video,modelo,video)
             for video in videos
         ]
 
         for future in as_completed(futures):
             try:
                 future.result()
+
             except Exception as e:
                 print(f"[ERRO] {e}")
                 gerar_log(f"ERRO - {e}")
@@ -106,17 +144,24 @@ def processar_videos_em_paralelo(modelo, videos, max_workers=2):
 
 def main():
     print("Iniciando sistema...")
-
     preparar_pastas()
-    modelo = carregar_modelo()
+
+    escolha = escolher_processamento()
+    usar_gpu = (escolha == 1)
+    modelo = carregar_modelo(usar_gpu)
 
     videos = obter_videos(NOME_PASTA_DE_VIDEOS)
 
     if not videos:
-        print("Nenhum vídeo encontrado")
+        print("Nenhum video encontrado")
         return
 
-    processar_videos_em_paralelo(modelo, videos, max_workers=2)
+    if usar_gpu:
+        processar_videos_normal(modelo, videos)
+
+    else:
+        workers = max(1, os.cpu_count() // 2)
+        processar_videos_em_paralelo(modelo, videos, max_workers=workers)
 
     print("\nFinalizado.")
 
