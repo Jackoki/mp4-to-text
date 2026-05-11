@@ -1,4 +1,5 @@
 from faster_whisper import WhisperModel
+from tqdm import tqdm
 
 def carregar_modelo(usar_gpu):
     if usar_gpu:

@@ -22,7 +22,8 @@ def main():
         processar_videos_normal(modelo,videos)
 
     else:
-        processar_videos_em_paralelo(modelo, videos, os.cpu_count())
+        cpu_workers = max(1, (os.cpu_count() or 1) // 2)
+        processar_videos_em_paralelo(modelo, videos, cpu_workers)
 
     print("\nFinalizado.")
 
