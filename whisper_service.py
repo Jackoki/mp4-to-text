@@ -22,8 +22,8 @@ def escolher_processamento():
 
         print("\nEscolha invalida\n")
 
-def transcrever_video(modelo, caminho_video):
-    segments, _ = modelo.transcribe(caminho_video, vad_filter=True, vad_parameters=dict(min_silence_duration_ms=500))
+def transcrever_video(modelo, caminho_audio, idioma):
+    segments, _ = modelo.transcribe(caminho_audio, language=idioma, vad_filter=True, vad_parameters=dict(min_silence_duration_ms=500))
     linhas = []
 
     for seg in segments:
