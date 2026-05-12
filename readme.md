@@ -48,22 +48,24 @@ mp4-to-text/
 ├── videos/
 ├── transcricoes/
 └── log.txt
+```
 
 ---
 
-## 📦 Instalação do FFmpeg (opcional, mas recomendado)
+## 📦 Instalação do FFmpeg
 
 O FFmpeg é uma ferramenta utilizada para leitura e processamento de arquivos de vídeo e áudio.  
 Ele pode ser necessário em alguns sistemas para garantir compatibilidade com arquivos `.mp4`.
 
 ---
 
-## 🔎 1. Verificar se já está instalado
+## 🔎 Verificar se já está instalado
 
 Abra o terminal e execute:
 
 ```bash id="check_ffmpeg"
 ffmpeg -version
+```
 
 Se aparecer a versão, o FFmpeg já está instalado e não é necessário fazer nada.
 
@@ -92,7 +94,9 @@ Testar instalação
 
 Abra o terminal novamente e execute:
 
+```bash
 ffmpeg -version
+```
 
 Se aparecer informações da versão, está pronto
 
@@ -102,12 +106,14 @@ Se aparecer informações da versão, está pronto
 
 Se você deseja usar a GPU para acelerar a transcrição, será necessário instalar o CUDA Toolkit e o cuDNN.
 
-### 🔎 1. Verifique se sua GPU suporta CUDA
+### 🔎 Verifique se sua GPU suporta CUDA
 
 Execute no terminal:
 
 ```bash
 nvidia-smi
+```
+
 Se aparecer sua placa NVIDIA, ela é compatível.
 
 Baixe o CUDA Toolkit:
@@ -142,3 +148,34 @@ C:\Program Files\NVIDIA GPU Computing Toolkit\CUDA\v12.x\ (Ou o lugar que foi in
 Adicione no PATH do Windows:
 C:\Program Files\NVIDIA GPU Computing Toolkit\CUDA\v12.x\bin
 C:\Program Files\NVIDIA GPU Computing Toolkit\CUDA\v12.x\libnvvp
+
+## 💻 Execução do Projeto
+Existe 2 formas para a execução do projeto. Caso decida utilizar a CPU, basta entrar na pasta do programa e executar:
+```bash
+python main.py
+```
+
+Caso queira utilizar a GPU, é necessário criar o ambiente virtual para a execução da GPU da seguinte maneira na pasta do programa:
+```bash
+python -m venv venv
+```
+
+```bash
+venv\Scripts\activate
+```
+
+Se o ambiente estiver ativo, você verá isso no terminal:
+
+```bash
+(venv) C:\local_da_pasta_do_programa>
+```
+
+E então instale as dependências:
+```bash
+pip install -r requirements.txt
+```
+
+E execute:
+```bash
+python main.py
+```

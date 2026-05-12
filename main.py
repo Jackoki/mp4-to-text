@@ -29,7 +29,6 @@ def main():
 
     idioma = detectar_idioma(modelo, primeiro_audio)
     os.remove(primeiro_audio)
-
     print(f"\nIdioma detectado: {idioma}")
 
     if usar_gpu:
